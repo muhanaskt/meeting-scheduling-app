@@ -1,14 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAtom } from "jotai";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button, Form, Alert } from "react-bootstrap";
 import { showModalAtom, newEventAtom } from "../atoms/calendarAtoms";
 import useCalendar from "../hooks/useCalendar";
- 
-const MeetingModal = () => { 
+
+const MeetingModal = () => {
     const [showModal, setShowModal] = useAtom(showModalAtom);
     const [newEvent, setNewEvent] = useAtom(newEventAtom);
-    const { handleSaveEvent } = useCalendar();
- 
+    const { handleSaveEvent, events } = useCalendar();
+    const [error, setError] = useState("");
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -17,17 +17,60 @@ const MeetingModal = () => {
             ...prev,
             [name]: value,  
         }));
+
+        if (name === "startTime" || name === "endTime") {
+            validateTime();
+        }
     };
 
- 
+    const validateTime = () => {
+        if (!newEvent.date || !newEvent.startTime || !newEvent.endTime) return;
+    
+        const selectedDateStr = new Date(newEvent.date).toISOString().split("T")[0];
+    
+        // Convert selected times to Date objects
+        const selectedStart = new Date(`${selectedDateStr}T${newEvent.startTime}`);
+        const selectedEnd = new Date(`${selectedDateStr}T${newEvent.endTime}`);
+    
+        if (selectedStart >= selectedEnd) {
+            setError("End time must be after start time.");
+            return;
+        }
+    
+        const isConflict = events.some(event => {
+            const eventDateStr = new Date(event.date).toISOString().split("T")[0];
+    
+            if (eventDateStr !== selectedDateStr || event.location !== newEvent.location) return false;
+    
+            const eventStart = new Date(`${eventDateStr}T${event.startTime}`);
+            const eventEnd = new Date(`${eventDateStr}T${event.endTime}`);
+    
+            return (selectedStart < eventEnd && selectedEnd > eventStart); // Overlapping time check
+        });
+    
+        if (isConflict) {
+            setError("This time slot is already booked. Please select another time.");
+        } else {
+            setError("");
+        }
+    };
+
+    
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (error) return;
+        handleSaveEvent(e);
+    };
+
     return (
         <Modal show={showModal} onHide={() => setShowModal(false)}>
             <Modal.Header closeButton>
                 <Modal.Title>Schedule a Meeting</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form onSubmit={handleSaveEvent}>
-                    {/* Title */}
+                {error && <Alert variant="danger">{error}</Alert>}
+                <Form onSubmit={handleSubmit}>
                     <Form.Group className="mb-3">
                         <Form.Label>Meeting Title</Form.Label>
                         <Form.Control
@@ -38,8 +81,6 @@ const MeetingModal = () => {
                             required
                         />
                     </Form.Group>
-
-                    {/* Start Time */}
                     <Form.Group className="mb-3">
                         <Form.Label>Start Time</Form.Label>
                         <Form.Control
@@ -50,8 +91,6 @@ const MeetingModal = () => {
                             required
                         />
                     </Form.Group>
-
-                    {/* End Time */}
                     <Form.Group className="mb-3">
                         <Form.Label>End Time</Form.Label>
                         <Form.Control
@@ -62,7 +101,6 @@ const MeetingModal = () => {
                             required
                         />
                     </Form.Group>
-
                     <Form.Group className="mb-3">
                         <Form.Label>Email</Form.Label>
                         <Form.Control
@@ -73,7 +111,6 @@ const MeetingModal = () => {
                             required
                         />
                     </Form.Group>
-                 
                     <Form.Group className="mb-3">
                         <Form.Label>Select Room</Form.Label>
                         <Form.Select
@@ -88,8 +125,6 @@ const MeetingModal = () => {
                             <option value="Room 3">Room 3</option>
                         </Form.Select>
                     </Form.Group>
-
-                    {/* Select Project */}
                     <Form.Group className="mb-3">
                         <Form.Label>Select Project</Form.Label>
                         <Form.Select
@@ -104,8 +139,7 @@ const MeetingModal = () => {
                             <option value="Project C">Project C</option>
                         </Form.Select>
                     </Form.Group>
-                      {/* Description */}
-                      <Form.Group className="mb-3">
+                    <Form.Group className="mb-3">
                         <Form.Label>Description</Form.Label>
                         <Form.Control
                             as="textarea"
@@ -116,12 +150,11 @@ const MeetingModal = () => {
                             required
                         />
                     </Form.Group>
-                    {/* Buttons */}
                     <Modal.Footer>
                         <Button variant="secondary" onClick={() => setShowModal(false)}>
                             Cancel
                         </Button>
-                        <Button variant="primary" type="submit">
+                        <Button variant="primary" type="submit" disabled={!!error}>
                             Save
                         </Button>
                     </Modal.Footer>
