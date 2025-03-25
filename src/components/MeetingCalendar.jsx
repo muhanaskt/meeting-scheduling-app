@@ -25,9 +25,7 @@ const MeetingCalendar = () => {
 
   const formattedEvents = events.map((event) => {
     const eventDate = new Date(event.date);
-
     const eventDateStr = eventDate.toISOString().split("T")[0];
-
     return {
       title: event.title,
       _id: event._id,
@@ -35,11 +33,9 @@ const MeetingCalendar = () => {
       endTime: event.endTime,
       date: eventDateStr,
       project: event.project,
-
       description: event.description,
       email: event.email,
       location: event.location,
-
       start: new Date(`${eventDateStr}T${event.startTime}:00`),
       end: new Date(`${eventDateStr}T${event.endTime}:00`),
     };
