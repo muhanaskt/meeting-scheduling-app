@@ -55,7 +55,7 @@ const MeetingModal = () => {
         }
     };
 
-    
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -154,7 +154,7 @@ const MeetingModal = () => {
                         <Button variant="secondary" onClick={() => setShowModal(false)}>
                             Cancel
                         </Button>
-                        <Button variant="primary" type="submit" disabled={!!error}>
+                        <Button variant="primary" type="submit">
                             Save
                         </Button>
                     </Modal.Footer>
