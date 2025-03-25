@@ -20,10 +20,12 @@ const useCalendar = () => {
   const [user] = useAtom(userAtom);
   // const [showLoginModal, setShowLoginModal] = useAtom(showLoginModalAtom);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // Fetch events from API
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/events")
+      .get(`${API_URL}/api/events`)
       .then((res) => setEvents(res.data))
       .catch((err) => console.error("Error fetching events:", err));
   }, [setEvents]);
@@ -32,7 +34,7 @@ const useCalendar = () => {
     e.preventDefault();
 
     await axios
-      .post("http://localhost:5000/api/events", newEvent)
+      .post(`${API_URL}/api/events`, newEvent)
       .then((res) => {
         setEvents([...events, res.data]);
         setShowModal(false);
@@ -69,7 +71,7 @@ const useCalendar = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/events/${_id}`,
+        `${API_URL}/api/events/${_id}`,
         eventData
       );
 
@@ -90,7 +92,7 @@ const useCalendar = () => {
     if (!selectedEvent) return;
 
     axios
-      .delete(`http://localhost:5000/api/events/${selectedEvent._id}`)
+      .delete(`${API_URL}/api/events/${selectedEvent._id}`)
       .then(() => {
         setEvents(events.filter((event) => event._id !== selectedEvent._id));
         setSelectedEvent(null);
