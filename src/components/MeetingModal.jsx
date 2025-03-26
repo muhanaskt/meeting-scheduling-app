@@ -28,7 +28,6 @@ const MeetingModal = () => {
     
         const selectedDateStr = new Date(newEvent.date).toISOString().split("T")[0];
     
-        // Convert selected times to Date objects
         const selectedStart = new Date(`${selectedDateStr}T${newEvent.startTime}`);
         const selectedEnd = new Date(`${selectedDateStr}T${newEvent.endTime}`);
     
@@ -45,7 +44,7 @@ const MeetingModal = () => {
             const eventStart = new Date(`${eventDateStr}T${event.startTime}`);
             const eventEnd = new Date(`${eventDateStr}T${event.endTime}`);
     
-            return (selectedStart < eventEnd && selectedEnd > eventStart); // Overlapping time check
+            return (selectedStart < eventEnd && selectedEnd > eventStart);  
         });
     
         if (isConflict) {
